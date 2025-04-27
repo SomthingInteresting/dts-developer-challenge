@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import routers later when they are created
-# from .api.v1.api import api_router
+# Import the main API router
+from .api.v1.api import api_router
 
 # Create the FastAPI app instance
 app = FastAPI(title="HMCTS Task Management API", version="0.1.0")
@@ -23,8 +23,9 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# Include the API router (uncomment later)
-# app.include_router(api_router, prefix="/api/v1")
+# Include the API router
+# All routes defined in api_router will be available under /api/v1
+app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/", tags=["Root"])
