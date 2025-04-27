@@ -1,8 +1,12 @@
 import os
 from dotenv import load_dotenv
+from pathlib import Path # Import Path
+
+# Define the path to the .env file relative to this config file
+env_path = Path(__file__).parent.parent / '.env'
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(dotenv_path=env_path)
 
 # Use os.getenv to fetch the variable, providing a default is good practice
 # though for DATABASE_URL, we might want it to fail if not set.

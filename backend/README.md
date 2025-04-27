@@ -6,53 +6,54 @@
 
 ## Prerequisites
 
-- Python [Specify version, e.g., 3.10+]
-- [pip/poetry]
-- Access to a running PostgreSQL database (see root README for Docker setup).
+- Docker Desktop or Docker Engine with Docker Compose installed.
 
-## Setup
+## Setup (Docker)
 
-1.  **Navigate to this directory:**
+This service is designed to be run using Docker Compose from the project root.
+
+1.  **Navigate to the project root directory:**
     ```bash
-    cd backend
+    cd ..
     ```
-2.  **Create & Activate Virtual Environment:**
+2.  **Environment Variables:**
+    - Ensure a `.env` file exists in this directory (`backend/.env`). Docker Compose will automatically load it into the service container.
+    - It must contain the following variable, pointing to the database service defined in `docker-compose.yml`:
+    ```dotenv
+    DATABASE_URL=postgresql://taskuser:taskpassword@db:5432/taskdb
+    # Add other backend-specific variables if needed
+    ```
+3.  **Database Initialization (First Run):**
+    - The database container (`db`) needs to be running.
+    - To create the necessary database tables defined by the SQLAlchemy models, run the following command from the project root:
     ```bash
-    python -m venv venv
-    source venv/bin/activate  # Linux/macOS
-    # venv\Scripts\activate  # Windows
+    docker-compose run --rm backend python -m backend.init_db
     ```
-3.  **Install Dependencies:**
+
+## Running the Service (Docker)
+
+1.  **Start Services:** From the project root, run:
     ```bash
-    pip install -r requirements.txt
-    # or poetry install
+    docker-compose up -d --build
     ```
-4.  **Environment Variables:**
-    - Create a `.env` file in this directory (`backend/.env`).
-    - Add the following, adjusting values as needed:
-      ```dotenv
-      DATABASE_URL=postgresql://taskuser:taskpassword@localhost:5432/taskdb
-      # Add other variables if needed (e.g., SECRET_KEY)
-      ```
-5.  **Database Migrations:**
-    - [Instructions for running Alembic migrations, e.g., `alembic upgrade head`]
-    - [Or instructions for initial table creation if not using Alembic]
-
-## Running the Service
-
-- **Start Development Server:**
-  ```bash
-  uvicorn main:app --reload --port 8000
-  ```
-- **API Base URL:** `http://localhost:8000`
-- **API Documentation (Swagger UI):** `http://localhost:8000/docs`
+    - The `--build` flag ensures the backend image is built if it doesn't exist or if the `Dockerfile` or source code has changed.
+    - The `-d` flag runs the services in detached mode (in the background).
+2.  **API Access:**
+    - The backend API will be accessible on your host machine at `http://localhost:8000`.
+    - API Documentation (Swagger UI): `http://localhost:8000/docs`.
+3.  **View Logs:**
+    ```bash
+    docker-compose logs backend
+    # Use -f to follow logs: docker-compose logs -f backend
+    ```
+4.  **Stop Services:**
+    ```bash
+    docker-compose down
+    ```
 
 ## Running Tests
 
-```bash
-pip install pytest httpx  # If not already in requirements
-pytest
-```
+[TODO: Update test running instructions for Docker setup]
 
 ## Project Structure
 
@@ -61,14 +62,14 @@ backend/
 ├── api/            # API endpoints (routers)
 ├── core/           # Core components (config)
 ├── crud/           # Database CRUD functions
-├── db/             # Database session setup, base model
+├── db/             # Database session setup, base model, init script
 ├── models/         # SQLAlchemy ORM models
 ├── schemas/        # Pydantic schemas (data validation/serialisation)
 ├── tests/          # Unit and integration tests
-├── venv/           # Virtual environment
-├── .env            # Environment variables (ignored by git)
+├── .env            # Environment variables (loaded by Docker Compose)
 ├── main.py         # FastAPI application entry point
-├── requirements.txt # Dependencies (or pyproject.toml for Poetry)
+├── requirements.txt # Dependencies
+├── Dockerfile      # Docker build instructions
 └── README.md       # This file
 ```
 
@@ -78,8 +79,5 @@ backend/
 - Uvicorn
 - SQLAlchemy
 - Pydantic
-- Psycopg2 (PostgreSQL driver)
-- Alembic (if used for migrations)
-- Pytest
-- HTTPX
+- Psycopg2-binary (PostgreSQL driver)
 - [Add others as needed]

@@ -3,6 +3,7 @@ services:
   db:
     image: postgres:15 # Or your preferred version
     restart: always
+    container_name: dts-developer-challenge-db-1 # Optional: Give the container a predictable name
     environment:
       POSTGRES_USER: taskuser
       POSTGRES_PASSWORD: taskpassword # Use a more secure password in a real project!
@@ -11,6 +12,28 @@ services:
       - "5432:5432" # Map host port to container port
     volumes:
       - postgres_data:/var/lib/postgresql/data # Persist data
+      - ./backend/db/init:/docker-entrypoint-initdb.d # Mount the init script
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # Assuming a Dockerfile exists in ./backend
+    container_name: dts-developer-challenge-backend-cmd # Optional name
+    volumes:
+      - ./backend:/app/backend # Mount backend code into /app/backend
+    working_dir: /app # Set working directory ONE LEVEL UP from code
+    ports:
+      - "8000:8000" # Map host port to container port
+    env_file:
+      - ./backend/.env # Load environment variables from .env
+    depends_on:
+      - db # Wait for db to start
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 # Start the FastAPI server, specifying the module
+    networks:
+      - default # Ensure it's on the same network
 
 volumes:
   postgres_data:
+
+networks:
+  default:
