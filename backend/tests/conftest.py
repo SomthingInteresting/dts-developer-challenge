@@ -1,16 +1,40 @@
 import pytest
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+
+# Adjust imports based on your project structure
+# Assumes db.base_class and models.task are accessible
+from backend.db.base_class import Base
+from backend.models.task import Task # Import your model(s)
+
+# Use SQLite in-memory database for testing
+TEST_DATABASE_URL = "sqlite:///:memory:"
+
+# Create a test engine
+# connect_args is required for SQLite to allow shared connections across threads
+engine = create_engine(
+    TEST_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+
+# Create a test session local
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+@pytest.fixture(scope="function") # Use function scope for test isolation
+def db() -> Session:
+    """Pytest fixture to provide a test database session."""
+    # Create all tables for the test database
+    Base.metadata.create_all(bind=engine)
+
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+        # Drop all tables after the test
+        Base.metadata.drop_all(bind=engine)
+
+# You can add other fixtures here, e.g., for creating test data
 
 # Import your CRUD functions and models here when ready
 # from app.crud import crud_task
-# from app.models import Task
-
-# Fixtures can be defined here later, e.g., for setting up a test database session
-
-@pytest.fixture(scope="module")
-def db() -> Session:
-    # Placeholder for a database session fixture
-    # In a real setup, this would connect to a test database
-    print("\n(Setting up test DB session fixture - placeholder)")
-    yield None # Replace None with the actual session
-    print("\n(Tearing down test DB session fixture - placeholder)") 
+# from app.models import Task 
