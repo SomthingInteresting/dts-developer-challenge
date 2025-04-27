@@ -1,83 +1,54 @@
-# Frontend Application (React/TypeScript)
+# React + TypeScript + Vite
 
-## Overview
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-[Describe the role of this React application... provides UI for task management, interacts with the backend API]
+Currently, two official plugins are available:
 
-## Prerequisites
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-- Node.js [Specify version, e.g., v18+]
-- [npm/yarn]
+## Expanding the ESLint configuration
 
-## Setup
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-1.  **Navigate to this directory:**
-    ```bash
-    cd frontend
-    ```
-2.  **Install Dependencies:**
-    ```bash
-    npm install
-    # or yarn install
-    ```
-3.  **Environment Variables:**
-    - Create a `.env.local` file in this directory (`frontend/.env.local`).
-    - Add the following, ensuring it points to your running backend:
-      ```dotenv
-      VITE_API_BASE_URL=http://localhost:8000
-      ```
-
-## Running the Application
-
-- **Start Development Server:**
-  ```bash
-  npm run dev
-  # or yarn dev
-  ```
-- **Access Application:** Open your browser to `http://localhost:5173` (or the port specified by Vite).
-
-## Running Tests
-
-```bash
-npm run test
-# or yarn test
+```js
+export default tseslint.config({
+  extends: [
+    // Remove ...tseslint.configs.recommended and replace with this
+    ...tseslint.configs.recommendedTypeChecked,
+    // Alternatively, use this for stricter rules
+    ...tseslint.configs.strictTypeChecked,
+    // Optionally, add this for stylistic rules
+    ...tseslint.configs.stylisticTypeChecked,
+  ],
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
 ```
 
-## Building for Production (Optional)
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-npm run build
-# or yarn build
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default tseslint.config({
+  plugins: {
+    // Add the react-x and react-dom plugins
+    'react-x': reactX,
+    'react-dom': reactDom,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended typescript rules
+    ...reactX.configs['recommended-typescript'].rules,
+    ...reactDom.configs.recommended.rules,
+  },
+})
 ```
-
-- The output will be in the `dist/` directory.
-
-## Project Structure
-
-```
-frontend/
-├── public/         # Static assets
-├── src/
-│   ├── components/   # Reusable React components
-│   ├── services/     # API client (e.g., api.ts)
-│   ├── types/        # TypeScript type definitions
-│   ├── App.tsx       # Main application component
-│   └── main.tsx      # Application entry point
-├── .env.local      # Local environment variables (ignored by git)
-├── index.html      # Main HTML page
-├── package.json    # Project manifest and dependencies
-├── tsconfig.json   # TypeScript configuration
-├── vite.config.ts  # Vite configuration
-└── README.md       # This file
-```
-
-## Key Dependencies
-
-- React
-- React DOM
-- TypeScript
-- Vite
-- Axios (for API calls)
-- Vitest (for testing)
-- @testing-library/react
-- [Add others as needed, e.g., state management, UI libraries]
