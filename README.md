@@ -2,112 +2,72 @@
 
 ## Overview
 
-[Briefly describe the project and its purpose... Mention tech stack: Python/FastAPI, React/TS, PostgreSQL]
+This project is a simple task management application built for the DTS Developer Challenge. It features a React/TypeScript frontend styled with `govuk-react` and a Python/FastAPI backend API connected to a PostgreSQL database. The entire application stack is designed to be run using Docker Compose for ease of setup and development consistency.
 
 ## Repository Structure
 
-- `backend/`: Contains the Python/FastAPI backend service.
-- `frontend/`: Contains the React/TS frontend application.
-- `docker-compose.yml`: Defines services, including the PostgreSQL database.
-- `PLANNING.md`: Outlines the development plan and rationale.
+- `backend/`: Contains the Python/FastAPI backend service (API, database models, CRUD operations). See `backend/README.md` for details.
+- `frontend/`: Contains the React/Vite/TypeScript frontend application (UI components, API service). See `frontend/README.md` for details.
+- `docker-compose.yml`: Defines the application services (frontend, backend, db) for Docker Compose.
+- `.gitignore`: Standard Git ignore file.
+- `README.md`: This file - provides overall project information and Docker Compose instructions.
 
-## Setup & Running
+## Running with Docker Compose (Recommended)
 
-### Prerequisites
-
-- Git
-- Docker & Docker Compose
-- Node.js (Specify version, e.g., v18+)
-- Python (Specify version, e.g., 3.10+)
-- [Add package managers if specific ones are assumed, e.g., `pip`/`poetry`, `npm`/`yarn`]
-
-### Installation & Startup
-
-1.  **Clone the repository:**
-
-    ```bash
-    git clone [your-repo-url]
-    cd [your-repo-directory]
-    ```
-
-2.  **Start Database:**
-
-    ```bash
-    docker-compose up -d db
-    ```
-
-    - [Add note about initial DB setup/waiting time if necessary]
-
-3.  **Backend Setup & Run:**
-
-    - Navigate to `backend` directory.
-    - [Instructions for virtual env, installing deps, .env setup, migrations]
-    - [Command to start backend server]
-
-4.  **Frontend Setup & Run:**
-    - Navigate to `frontend` directory.
-    - [Instructions for installing deps, .env setup]
-    - [Command to start frontend dev server]
-
-### Accessing the Application
-
-- **Frontend UI:** [http://localhost:PORT]
-- **Backend API Base URL:** [http://localhost:PORT]
-- **API Documentation (Swagger):** [http://localhost:PORT/docs]
-
-## Planning
-
-See [PLANNING.md](PLANNING.md) for details on the development approach and technical decisions.
-
-## Running with Docker Compose
-
-This is the recommended way to run the application for development. It ensures all services (frontend, backend, database) are started with the correct configuration and network settings.
+This is the primary method for running the application. It manages the database, backend, and frontend services together.
 
 ### Prerequisites
 
-- Docker Desktop or Docker Engine with Docker Compose installed.
+- Docker Desktop or Docker Engine with Docker Compose v2+ installed.
+- Git (for cloning the repository).
 
 ### Setup
 
 1.  **Clone the repository:**
     ```bash
-    # git clone ...
+    # Replace with your repository URL if applicable
+    git clone https://github.com/somthinginteresting/dts-developer-challenge.git
     cd dts-developer-challenge
     ```
 2.  **Backend Environment File:**
     - Create a `.env` file inside the `backend` directory (`backend/.env`).
-    - Add the database connection string:
-    ```dotenv
-    DATABASE_URL=postgresql://taskuser:taskpassword@db:5432/taskdb
-    ```
+    - Add the database connection string required by the backend service:
+      ```dotenv
+      DATABASE_URL=postgresql://taskuser:taskpassword@db:5432/taskdb
+      ```
+      _(Note: This uses the service name `db` which Docker Compose resolves internally)_
 3.  **Database Initialization (First Run Only):**
+    - The first time you run the application (or after clearing the database volume), the database tables need to be created.
     - Start the database service temporarily: `docker-compose up -d db`
+    - Wait a few seconds for the database to initialize fully.
     - Run the database initialization script using the backend service container:
-    ```bash
-    docker-compose run --rm backend python -m backend.init_db
-    ```
-    - You can stop the database service after initialization if desired: `docker-compose stop db`
+      ```bash
+      docker-compose run --rm backend python -m backend.init_db
+      ```
+    - You can optionally stop the database service afterwards (`docker-compose stop db`) before starting the full stack.
 
 ### Running the Application
 
-1.  **Build and Start:** From the project root directory, run:
+1.  **Build and Start:** From the project root directory (`dts-developer-challenge`), run:
     ```bash
     docker-compose up -d --build
     ```
-    - This will build the images for the frontend and backend (if they don't exist or have changed) and start all services defined in `docker-compose.yml`.
+    - This command builds the frontend and backend images (if they don't exist or have changed) and starts the database, backend, and frontend services in detached mode (`-d`).
 2.  **Accessing Services:**
-    - **Frontend:** `http://localhost:3000` (or whichever port the frontend service uses)
-    - **Backend API Docs:** `http://localhost:8000/docs`
+    - **Frontend:** `http://localhost:3000` (Served by Nginx)
+    - **Backend API Docs (Swagger UI):** `http://localhost:8000/docs`
 3.  **Viewing Logs:**
     ```bash
-    docker-compose logs          # View logs for all services
-    docker-compose logs -f backend # Follow logs for the backend
-    docker-compose logs -f frontend # Follow logs for the frontend
+    docker-compose logs          # View logs for all services (Ctrl+C to stop)
+    docker-compose logs -f       # Follow logs for all services (Ctrl+C to stop)
+    docker-compose logs -f backend # Follow logs for the backend only
+    docker-compose logs -f frontend # Follow logs for the frontend only
     ```
 4.  **Stopping the Application:**
     ```bash
     docker-compose down          # Stops and removes containers, networks
-    docker-compose down -v       # Stops and removes containers, networks, AND volumes (deletes DB data)
+    # Use with caution - deletes all database data:
+    # docker-compose down -v       # Stops/removes containers, networks, AND volumes
     ```
 
 ### Inspecting the Database
@@ -136,6 +96,22 @@ The recommended way to inspect the database contents is to use the `psql` client
     docker-compose down          # Stops and removes containers, networks
     ```
 
-## Manual Setup (Optional)
+### Running Tests (Backend)
 
-[Instructions for setting up backend and frontend manually without Docker, if desired]
+The backend tests use `pytest` and are configured to run against the database service within the Docker network.
+
+1.  **Ensure services are up (especially `db`):**
+    ```bash
+    docker-compose up -d db
+    # Or ensure all services are up: docker-compose up -d
+    ```
+2.  **Run tests:** Execute `pytest` inside a temporary backend container:
+    ```bash
+    docker-compose run --rm backend pytest
+    ```
+    - This connects to the `db` service using the `DATABASE_URL` from `backend/.env`.
+    - The test database session creates and drops tables for each test function to ensure isolation.
+
+## Manual Setup (Not Recommended)
+
+Running the services manually outside of Docker Compose is possible but requires separate setup for Python/Node environments, manual database creation, and careful configuration of environment variables (e.g., ensuring `DATABASE_URL` points to `localhost:5432` for the backend). Refer to the individual `backend/README.md` and `frontend/README.md` before the Dockerization steps were added for potential guidance, but the Docker Compose method is strongly recommended for consistency.

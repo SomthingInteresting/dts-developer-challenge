@@ -1,54 +1,41 @@
-# React + TypeScript + Vite
+# Frontend Service (React/Vite + TypeScript)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+This service provides the user interface for the Task Management application. It is built using React (with Vite) and TypeScript. Users can view, create, update the status of, and delete tasks. It interacts with the backend API service to fetch and manipulate task data. Styling is implemented using the `govuk-react` component library to align with the GOV.UK Design System.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Prerequisites
 
-## Expanding the ESLint configuration
+- Docker Desktop or Docker Engine with Docker Compose installed.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Setup & Running (Docker)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+This service is designed to be run using Docker Compose from the project root.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1.  **Navigate to the project root directory:**
+    ```bash
+    cd ..
+    ```
+2.  **Ensure Backend Environment:** Make sure the `backend/.env` file is configured correctly as described in the root `README.md`.
+3.  **Ensure Database Initialization:** Make sure the database has been initialized as described in the root `README.md` (`docker-compose run --rm backend python -m backend.init_db`).
+4.  **Build and Start All Services:** From the project root, run:
+    ```bash
+    docker-compose up -d --build
+    ```
+    - This command builds both the frontend and backend images (if needed) and starts the database, backend, and frontend services.
+5.  **Accessing the Frontend:** Open your web browser to:
+    `http://localhost:3000`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Development Notes
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+- The frontend is served via Nginx in the Docker container for production-like deployment.
+- API calls are proxied to the backend service running on port 8000 (handled automatically by using the correct `API_BASE_URL` in `src/services/api.ts` which points to the backend service within the Docker network or the exposed port).
+- Styling is implemented using `govuk-react`.
+
+## Stopping the Application
+
+From the project root:
+
+```bash
+docker-compose down
 ```
