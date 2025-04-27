@@ -32,6 +32,18 @@ services:
     networks:
       - default # Ensure it's on the same network
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dts-developer-challenge-frontend # Optional name
+    ports:
+      - "3000:80" # Map host port 3000 to container port 80 (Nginx)
+    depends_on:
+      - backend # Optional: Wait for backend if frontend needs it during build/start
+    networks:
+      - default # Ensure it's on the same network
+
 volumes:
   postgres_data:
 
