@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { Task, TaskStatus } from "../types/task";
 // Import govuk-react components
 import {
   ListItem, // Use for list structure
-  Select,
   Button,
   Paragraph,
-  // Tag, // Optional: Use Tag for status display
-  // Details, // Optional: Could use Details for description
+  Tag, // Added Tag
+  GridRow, // Added GridRow
+  GridCol, // Added GridCol
+  H3, // Added H3
+  Select, // Added Select back
 } from "govuk-react";
 
 interface TaskItemProps {
   task: Task;
-  onUpdateStatus: (id: number, status: TaskStatus) => void; // Placeholder for status update
-  onDelete: (id: number) => void; // Placeholder for delete
+  onUpdateStatus: (id: number, status: TaskStatus) => void; // Added prop back
+  onDelete: (id: number) => void;
 }
 
 // Helper to format date string (assuming due_date is YYYY-MM-DDTHH:MM:SS)
@@ -37,53 +39,120 @@ const formatDate = (dateString: string): string => {
   }
 };
 
+// Helper function to determine Tag color based on status
+const getStatusColor = (status: TaskStatus) => {
+  switch (status) {
+    case TaskStatus.DONE:
+      return "GREEN";
+    case TaskStatus.IN_PROGRESS:
+      return "BLUE";
+    case TaskStatus.PENDING:
+      return "GREY";
+    default:
+      return "GREY"; // Default or other statuses
+  }
+};
+
 const TaskItem: React.FC<TaskItemProps> = ({
   task,
-  onUpdateStatus,
+  onUpdateStatus, // Added back
   onDelete,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  // State to hold the selected status during editing
+  const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
+
+  const handleEditClick = () => {
+    setSelectedStatus(task.status); // Reset selection to current task status
+    setIsEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveClick = () => {
+    onUpdateStatus(task.id, selectedStatus);
+    setIsEditing(false);
+  };
+
   const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onUpdateStatus(task.id, event.target.value as TaskStatus);
+    setSelectedStatus(event.target.value as TaskStatus);
   };
 
   return (
     // Use ListItem for semantic list structure
-    <ListItem
-      style={{
-        borderBottom: "1px solid #b1b4b6",
-        paddingBottom: "15px",
-        marginBottom: "15px",
-      }}
-    >
+    <ListItem mb={6}>
       {" "}
-      {/* Basic separator */}
-      <h3>{task.title}</h3>{" "}
-      {/* Keeping h3 for now, could be Paragraph with bold */}
-      {task.description && <Paragraph mb={2}>{task.description}</Paragraph>}
+      {/* Added bottom margin instead of inline style */}
+      <H3 mb={1}>{task.title}</H3> {/* Using H3 with margin */}
+      {task.description && (
+        /* Replaced govuk-react Paragraph with standard <p> for description */
+        <p style={{ marginBottom: "10px" }}>{task.description}</p>
+      )}
       <Paragraph mb={4}>{`Due: ${formatDate(task.due_date)}`}</Paragraph>
-      <Select
-        label="Status"
-        input={{
-          value: task.status,
-          onChange: handleStatusChange,
-          name: `status-${task.id}`, // Unique name might be needed
-          id: `status-${task.id}`, // Unique ID
-        }}
-        mb={4} // Add margin below
-      >
-        {Object.values(TaskStatus).map((status) => (
-          <option key={status} value={status}>
-            {status.replace("_", " ")} {/* Make status more readable */}
-          </option>
-        ))}
-      </Select>
-      {/* Use GOV.UK styles for buttons */}
-      <Button
-        buttonColour="#DF3034" // GOV.UK Warning colour
-        onClick={() => onDelete(task.id)}
-      >
-        Delete
-      </Button>
+      <GridRow>
+        <GridCol setWidth="auto">
+          {" "}
+          {/* Allow Col to fit content */}
+          {!isEditing ? (
+            <Tag tint={getStatusColor(task.status)}>
+              {task.status.replace("_", " ").charAt(0).toUpperCase() +
+                task.status.replace("_", " ").slice(1).toLowerCase()}
+            </Tag>
+          ) : (
+            <Select
+              // Removed label prop for inline usage
+              input={{
+                value: selectedStatus,
+                onChange: handleStatusChange,
+                name: `status-edit-${task.id}`,
+                id: `status-edit-${task.id}`,
+              }}
+              style={{ marginBottom: 0 }} // Override default govuk-react mb
+            >
+              {Object.values(TaskStatus).map((status) => (
+                <option key={status} value={status}>
+                  {status.replace("_", " ").charAt(0).toUpperCase() +
+                    status.replace("_", " ").slice(1).toLowerCase()}
+                </option>
+              ))}
+            </Select>
+          )}
+        </GridCol>
+
+        {/* Action Buttons Column */}
+        <GridCol setWidth="auto" style={{ paddingLeft: "15px" }}>
+          {!isEditing ? (
+            <>
+              <Button
+                $buttonStyle="secondary"
+                onClick={handleEditClick}
+                style={{ marginRight: "10px" }}
+              >
+                Edit Status
+              </Button>
+              <Button buttonColour="#DF3034" onClick={() => onDelete(task.id)}>
+                Delete
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                $buttonStyle="primary"
+                onClick={handleSaveClick}
+                style={{ marginRight: "10px" }}
+              >
+                Save
+              </Button>
+              <Button $buttonStyle="warning" onClick={handleCancelClick}>
+                Cancel
+              </Button>
+            </>
+          )}
+        </GridCol>
+      </GridRow>
+      {/* Removed Select dropdown */}
       {/* TODO: Add Edit button/functionality */}
     </ListItem>
   );

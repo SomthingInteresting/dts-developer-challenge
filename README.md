@@ -112,6 +112,12 @@ The backend tests use `pytest` and are configured to run against the database se
     - This connects to the `db` service using the `DATABASE_URL` from `backend/.env`.
     - The test database session creates and drops tables for each test function to ensure isolation.
 
+## Design & Implementation Notes
+
+During development, some decisions were made to enhance the application while aiming to adhere to the core requirements and good development practices:
+
+- **Status Filtering:** The assessment required displaying tasks in a user-friendly interface. To meet this and align with the DDaT capability framework's skill of "User focus", status filtering (All, Pending, In Progress, Completed) was implemented. While the specific requirement didn't list filtering explicitly, it's considered a fundamental user need for managing tasks efficiently in any real-world scenario. The implementation uses clickable `Tag` components for simplicity, acknowledging that standard GDS filter patterns often use radios or checkboxes.
+
 ## Manual Setup (Not Recommended)
 
 Running the services manually outside of Docker Compose is possible but requires separate setup for Python/Node environments, manual database creation, and careful configuration of environment variables (e.g., ensuring `DATABASE_URL` points to `localhost:5432` for the backend). Refer to the individual `backend/README.md` and `frontend/README.md` before the Dockerization steps were added for potential guidance, but the Docker Compose method is strongly recommended for consistency.
