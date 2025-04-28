@@ -4,6 +4,7 @@ import { StyleSheetManager } from "styled-components";
 import isPropValid from "@emotion/is-prop-valid";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/main.scss";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Create a client

@@ -1,19 +1,5 @@
 import React, { useState } from "react";
 import { Task, TaskStatus } from "../types/task";
-import { Button, Tag } from "govuk-react";
-import styled from "styled-components";
-
-const StyledTd = styled.td`
-  border-bottom: 1px solid #b1b4b6;
-  padding: 10px 0;
-`;
-
-const CellContent = styled.div<{ $wrap?: boolean }>`
-  display: flex;
-  align-items: center;
-  white-space: ${(props) => (props.$wrap ? "normal" : "nowrap")};
-  overflow-wrap: ${(props) => (props.$wrap ? "break-word" : "normal")};
-`;
 
 interface TaskItemProps {
   task: Task;
@@ -21,16 +7,16 @@ interface TaskItemProps {
   onDelete: (id: number) => void;
 }
 
-const getStatusColor = (status: TaskStatus) => {
+const getStatusGovukColor = (status: TaskStatus): string => {
   switch (status) {
     case TaskStatus.COMPLETED:
-      return "GREEN";
+      return "green";
     case TaskStatus.IN_PROGRESS:
-      return "BLUE";
+      return "blue";
     case TaskStatus.PENDING:
-      return "GREY";
+      return "grey";
     default:
-      return "GREY";
+      return "grey";
   }
 };
 
@@ -64,9 +50,27 @@ const TaskItem: React.FC<TaskItemProps> = ({
     setIsEditing(false);
   };
 
-  const formattedDueDate = task.due_date
-    ? new Date(task.due_date).toLocaleDateString()
-    : "N/A";
+  const formattedDueDateTime = (() => {
+    if (!task.due_date) {
+      return "N/A";
+    }
+    try {
+      const dateObj = new Date(task.due_date);
+      if (isNaN(dateObj.getTime())) {
+        return "Invalid Date";
+      }
+      const datePart = dateObj.toLocaleDateString();
+      const timePart = dateObj.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      return `${datePart} ${timePart}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid Date";
+    }
+  })();
 
   const formatStatusDisplay = (status: TaskStatus): string => {
     switch (status) {
@@ -84,81 +88,85 @@ const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <tr className="govuk-table__row">
       {/* ID */}
-      <StyledTd className="govuk-table__cell">
-        <CellContent>{task.id}</CellContent>
-      </StyledTd>
+      <td className="govuk-table__cell">{task.id}</td>
       {/* Title */}
-      <StyledTd className="govuk-table__cell">
-        <CellContent $wrap>{task.title}</CellContent>
-      </StyledTd>
+      <td className="govuk-table__cell">{task.title}</td>
       {/* Description */}
-      <StyledTd className="govuk-table__cell">
-        <CellContent $wrap>{task.description}</CellContent>
-      </StyledTd>
-      {/* Due Date */}
-      <StyledTd className="govuk-table__cell">
-        <CellContent>{formattedDueDate}</CellContent>
-      </StyledTd>
+      <td className="govuk-table__cell">{task.description}</td>
+      {/* Due Date & Time */}
+      <td className="govuk-table__cell">{formattedDueDateTime}</td>
       {/* Status Display Only */}
-      <StyledTd className="govuk-table__cell">
-        <CellContent>
-          {isEditing ? (
-            <select
-              id={`status-select-${task.id}`}
-              value={selectedStatus}
-              onChange={handleStatusChange}
-              style={{ width: "100%", padding: "5px" }}
-            >
-              <option value={TaskStatus.PENDING}>
-                {formatStatusDisplay(TaskStatus.PENDING)}
-              </option>
-              <option value={TaskStatus.IN_PROGRESS}>
-                {formatStatusDisplay(TaskStatus.IN_PROGRESS)}
-              </option>
-              <option value={TaskStatus.COMPLETED}>
-                {formatStatusDisplay(TaskStatus.COMPLETED)}
-              </option>
-            </select>
-          ) : (
-            <Tag tint={getStatusColor(task.status)}>
-              {formatStatusDisplay(task.status)}
-            </Tag>
-          )}
-        </CellContent>
-      </StyledTd>
+      <td className="govuk-table__cell">
+        {isEditing ? (
+          <select
+            id={`status-select-${task.id}`}
+            className="govuk-select"
+            value={selectedStatus}
+            onChange={handleStatusChange}
+          >
+            <option value={TaskStatus.PENDING}>
+              {formatStatusDisplay(TaskStatus.PENDING)}
+            </option>
+            <option value={TaskStatus.IN_PROGRESS}>
+              {formatStatusDisplay(TaskStatus.IN_PROGRESS)}
+            </option>
+            <option value={TaskStatus.COMPLETED}>
+              {formatStatusDisplay(TaskStatus.COMPLETED)}
+            </option>
+          </select>
+        ) : (
+          <strong
+            className={`govuk-tag govuk-tag--${getStatusGovukColor(
+              task.status
+            )}`}
+          >
+            {formatStatusDisplay(task.status)}
+          </strong>
+        )}
+      </td>
       {/* Edit Status Action Cell */}
-      <StyledTd className="govuk-table__cell">
+      <td className="govuk-table__cell">
         {isEditing ? (
           <>
-            <Button size="small" onClick={handleSaveClick}>
+            <button
+              type="button"
+              className="govuk-button govuk-button--small govuk-!-margin-right-1"
+              data-module="govuk-button"
+              onClick={handleSaveClick}
+            >
               Save
-            </Button>
-            <Button
-              size="small"
-              $buttonStyle="warning"
+            </button>
+            <button
+              type="button"
+              className="govuk-button govuk-button--warning govuk-button--small"
+              data-module="govuk-button"
               onClick={handleCancelClick}
             >
               Cancel
-            </Button>
+            </button>
           </>
         ) : (
-          <Button
-            size="small"
-            $buttonStyle="secondary"
+          <button
+            type="button"
+            className="govuk-button govuk-button--secondary govuk-button--small"
+            data-module="govuk-button"
             onClick={handleEditClick}
           >
             Edit
-          </Button>
+          </button>
         )}
-      </StyledTd>
+      </td>
       {/* Actions Button */}
-      <StyledTd className="govuk-table__cell">
-        <CellContent>
-          <Button buttonColour="#f47738" onClick={handleDeleteClick}>
-            Delete
-          </Button>
-        </CellContent>
-      </StyledTd>
+      <td className="govuk-table__cell">
+        <button
+          type="button"
+          className="govuk-button govuk-button--warning"
+          data-module="govuk-button"
+          onClick={handleDeleteClick}
+        >
+          Delete
+        </button>
+      </td>
     </tr>
   );
 };
