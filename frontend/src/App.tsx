@@ -10,7 +10,6 @@ import {
 import { TaskStatus, TaskCreate, Task } from "./types/task";
 import TaskList from "./components/TaskList";
 import AddTaskForm from "./components/AddTaskForm";
-import React from "react";
 
 interface AppError {
   message: string;
