@@ -1,66 +1,48 @@
 import React, { useState } from "react";
 import { Task, TaskStatus } from "../types/task";
-// Import govuk-react components
+// Import necessary govuk-react components
 import {
-  ListItem, // Use for list structure
-  Button,
-  Paragraph,
-  Tag, // Added Tag
-  GridRow, // Added GridRow
-  GridCol, // Added GridCol
-  H3, // Added H3
-  Select, // Added Select back
+  Button, // Keep for actions
+  Select, // Keep for status dropdown
+  Tag, // Re-import Tag
 } from "govuk-react";
 
 interface TaskItemProps {
   task: Task;
-  onUpdateStatus: (id: number, status: TaskStatus) => void; // Added prop back
+  onUpdateStatus: (id: number, status: TaskStatus) => void;
   onDelete: (id: number) => void;
 }
-
-// Helper to format date string (assuming due_date is YYYY-MM-DDTHH:MM:SS)
-const formatDate = (dateString: string): string => {
-  try {
-    // Basic parsing and formatting
-    const date = new Date(dateString);
-    // Handle invalid date string if necessary
-    if (isNaN(date.getTime())) return "Invalid Date";
-    return date.toLocaleDateString("en-GB", {
-      // Example: UK format
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch (e) {
-    console.error("Error formatting date:", e);
-    return "Invalid Date";
-  }
-};
 
 // Helper function to determine Tag color based on status
 const getStatusColor = (status: TaskStatus) => {
   switch (status) {
-    case TaskStatus.DONE:
+    case TaskStatus.COMPLETED:
       return "GREEN";
     case TaskStatus.IN_PROGRESS:
       return "BLUE";
     case TaskStatus.PENDING:
       return "GREY";
     default:
-      return "GREY"; // Default or other statuses
+      return "GREY"; // Default for PENDING or any other status
   }
 };
 
 const TaskItem: React.FC<TaskItemProps> = ({
   task,
-  onUpdateStatus, // Added back
+  onUpdateStatus,
   onDelete,
 }) => {
+  // State for editing mode and temporary status selection
   const [isEditing, setIsEditing] = useState(false);
-  // State to hold the selected status during editing
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedStatus(e.target.value as TaskStatus);
+  };
+
+  const handleDeleteClick = () => {
+    onDelete(task.id);
+  };
 
   const handleEditClick = () => {
     setSelectedStatus(task.status); // Reset selection to current task status
@@ -76,85 +58,139 @@ const TaskItem: React.FC<TaskItemProps> = ({
     setIsEditing(false);
   };
 
-  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStatus(event.target.value as TaskStatus);
+  // Format the date (assuming due_date is a string in ISO format)
+  const formattedDueDate = task.due_date
+    ? new Date(task.due_date).toLocaleDateString()
+    : "N/A";
+
+  // Helper to format status for display
+  const formatStatusDisplay = (status: TaskStatus): string => {
+    switch (status) {
+      case TaskStatus.PENDING:
+        return "Pending";
+      case TaskStatus.IN_PROGRESS:
+        return "In Progress";
+      case TaskStatus.COMPLETED:
+        return "Completed";
+      default:
+        return status; // Fallback
+    }
   };
 
+  // Render a Table.Row instead of ListItem
   return (
-    // Use ListItem for semantic list structure
-    <ListItem mb={6}>
-      {" "}
-      {/* Added bottom margin instead of inline style */}
-      <H3 mb={1}>{task.title}</H3> {/* Using H3 with margin */}
-      {task.description && (
-        /* Replaced govuk-react Paragraph with standard <p> for description */
-        <p style={{ marginBottom: "10px" }}>{task.description}</p>
-      )}
-      <Paragraph mb={4}>{`Due: ${formatDate(task.due_date)}`}</Paragraph>
-      <GridRow>
-        <GridCol setWidth="auto">
-          {" "}
-          {/* Allow Col to fit content */}
-          {!isEditing ? (
-            <Tag tint={getStatusColor(task.status)}>
-              {task.status.replace("_", " ").charAt(0).toUpperCase() +
-                task.status.replace("_", " ").slice(1).toLowerCase()}
-            </Tag>
-          ) : (
+    <tr className="govuk-table__row">
+      {/* ID */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>{task.id}</div>
+      </td>
+      {/* Title */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        <div style={{ whiteSpace: "normal", overflowWrap: "break-word" }}>
+          {task.title}
+        </div>
+      </td>
+      {/* Description */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        <div style={{ whiteSpace: "normal", overflowWrap: "break-word" }}>
+          {task.description}
+        </div>
+      </td>
+      {/* Due Date */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {formattedDueDate}
+        </div>
+      </td>
+      {/* Status Display Only */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {isEditing ? (
+            // Editing mode: Show Select dropdown only
             <Select
-              // Removed label prop for inline usage
+              value={selectedStatus}
+              onChange={handleStatusChange}
+              label="Status"
+              labelIsHidden // Hide label visually but keep for accessibility
               input={{
-                value: selectedStatus,
-                onChange: handleStatusChange,
-                name: `status-edit-${task.id}`,
-                id: `status-edit-${task.id}`,
+                id: `status-select-${task.id}`,
               }}
-              style={{ marginBottom: 0 }} // Override default govuk-react mb
             >
-              {Object.values(TaskStatus).map((status) => (
-                <option key={status} value={status}>
-                  {status.replace("_", " ").charAt(0).toUpperCase() +
-                    status.replace("_", " ").slice(1).toLowerCase()}
-                </option>
-              ))}
+              <option value={TaskStatus.PENDING}>
+                {formatStatusDisplay(TaskStatus.PENDING)}
+              </option>
+              <option value={TaskStatus.IN_PROGRESS}>
+                {formatStatusDisplay(TaskStatus.IN_PROGRESS)}
+              </option>
+              <option value={TaskStatus.COMPLETED}>
+                {formatStatusDisplay(TaskStatus.COMPLETED)}
+              </option>
             </Select>
-          )}
-        </GridCol>
-
-        {/* Action Buttons Column */}
-        <GridCol setWidth="auto" style={{ paddingLeft: "15px" }}>
-          {!isEditing ? (
-            <>
-              <Button
-                $buttonStyle="secondary"
-                onClick={handleEditClick}
-                style={{ marginRight: "10px" }}
-              >
-                Edit Status
-              </Button>
-              <Button buttonColour="#DF3034" onClick={() => onDelete(task.id)}>
-                Delete
-              </Button>
-            </>
           ) : (
-            <>
-              <Button
-                $buttonStyle="primary"
-                onClick={handleSaveClick}
-                style={{ marginRight: "10px" }}
-              >
-                Save
-              </Button>
-              <Button $buttonStyle="warning" onClick={handleCancelClick}>
-                Cancel
-              </Button>
-            </>
+            // Display mode: Show Tag only
+            <Tag tint={getStatusColor(task.status)}>
+              {formatStatusDisplay(task.status)}
+            </Tag>
           )}
-        </GridCol>
-      </GridRow>
-      {/* Removed Select dropdown */}
-      {/* TODO: Add Edit button/functionality */}
-    </ListItem>
+        </div>
+      </td>
+      {/* Edit Status Action Cell */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        {isEditing ? (
+          // Editing mode: Show Save/Cancel buttons
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Button size="small" onClick={handleSaveClick}>
+              Save
+            </Button>
+            <Button
+              size="small"
+              $buttonStyle="warning"
+              onClick={handleCancelClick}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          // Display mode: Show Edit button
+          <Button
+            size="small"
+            $buttonStyle="secondary"
+            onClick={handleEditClick}
+          >
+            Edit
+          </Button>
+        )}
+      </td>
+      {/* Actions Button */}
+      <td
+        className="govuk-table__cell"
+        style={{ borderBottom: "1px solid #b1b4b6" }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Button buttonColour="#f47738" onClick={handleDeleteClick}>
+            Delete
+          </Button>
+        </div>
+      </td>
+    </tr>
   );
 };
 

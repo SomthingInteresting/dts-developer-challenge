@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getTasks,
@@ -20,20 +20,13 @@ import {
   GridCol,
   Paragraph,
   Button,
-  Tag,
 } from "govuk-react";
 import GlobalStyle from "./styles/GlobalStyle";
-
-// Define Status Filters including "ALL"
-const ALL_STATUSES = "ALL";
-type StatusFilter = TaskStatus | typeof ALL_STATUSES;
 
 function App() {
   const queryClient = useQueryClient();
 
   // State for filter and form visibility
-  const [selectedStatusFilter, setSelectedStatusFilter] =
-    useState<StatusFilter>(ALL_STATUSES);
   const [isAddTaskFormVisible, setIsAddTaskFormVisible] = useState(false);
 
   // Query for fetching tasks
@@ -46,14 +39,6 @@ function App() {
     queryKey: ["tasks"], // Unique key for this query
     queryFn: getTasks, // Function that fetches the data
   });
-
-  // Filter tasks based on selectedStatusFilter
-  const filteredTasks = useMemo(() => {
-    if (selectedStatusFilter === ALL_STATUSES) {
-      return tasks;
-    }
-    return tasks.filter((task) => task.status === selectedStatusFilter);
-  }, [tasks, selectedStatusFilter]);
 
   // *** Add Mutation for updating task status ***
   const updateStatusMutation = useMutation<
@@ -125,49 +110,20 @@ function App() {
         <Main>
           <GridRow>
             <GridCol>
-              <H1 mb={6}>Task Management</H1> {/* Simplified title */}
-            </GridCol>
-          </GridRow>
-          {/* --- Filters --- */}
-          <GridRow mb={4}>
-            <GridCol>
-              <span style={{ marginRight: "15px", fontWeight: "bold" }}>
-                Filter by status:
-              </span>
-              {[ALL_STATUSES, ...Object.values(TaskStatus)].map((status) => (
-                <Tag
-                  key={status}
-                  style={{
-                    marginRight: "10px",
-                    cursor: "pointer",
-                    border:
-                      selectedStatusFilter === status
-                        ? "2px solid #005ea5"
-                        : "1px solid #b1b4b6",
-                    padding: "5px 10px",
-                  }}
-                  onClick={() =>
-                    setSelectedStatusFilter(status as StatusFilter)
-                  }
-                >
-                  {status.replace("_", " ").charAt(0).toUpperCase() +
-                    status.replace("_", " ").slice(1).toLowerCase()}
-                </Tag>
-              ))}
+              <H1 mb={6}>HMCTS Task Management</H1> {/* Simplified title */}
             </GridCol>
           </GridRow>
           {/* --- Add Task Section (Button & Form) --- */}
-          <GridRow mb={isAddTaskFormVisible ? 2 : 4}>
-            {" "}
-            {/* Adjust spacing */}
-            <GridCol>
-              <Button
-                onClick={() => setIsAddTaskFormVisible(!isAddTaskFormVisible)}
-              >
-                {isAddTaskFormVisible ? "Cancel Add Task" : "Add New Task"}
-              </Button>
-            </GridCol>
-          </GridRow>
+          {/* <GridRow mb={isAddTaskFormVisible ? 2 : 4}>
+             {" "}
+             <GridCol>
+               <Button
+                 onClick={() => setIsAddTaskFormVisible(!isAddTaskFormVisible)}
+               >
+                 {isAddTaskFormVisible ? "Cancel Add Task" : "Add New Task"}
+               </Button>
+             </GridCol>
+           </GridRow> */}
           {isAddTaskFormVisible && (
             <GridRow mb={6}>
               <GridCol>
@@ -188,47 +144,69 @@ function App() {
           {!isAddTaskFormVisible && (
             <hr style={{ borderColor: "#b1b4b6", margin: "20px 0" }} />
           )}
-          {/* --- Task List --- */}
-          <H2>Tasks</H2> {/* Heading for list */}
+          {/* --- Task Header and Add Button Row --- */}
+          <GridRow mb={2}>
+            {" "}
+            {/* Add margin bottom */}
+            <GridCol setWidth="two-thirds">
+              <H2 mb={0}>Tasks</H2>{" "}
+              {/* Heading for list, remove default bottom margin */}
+            </GridCol>
+            <GridCol setWidth="one-third" style={{ textAlign: "right" }}>
+              {/* Moved Add Button */}
+              <Button
+                onClick={() => setIsAddTaskFormVisible(!isAddTaskFormVisible)}
+              >
+                {isAddTaskFormVisible ? "Cancel Add Task" : "Add New Task"}
+              </Button>
+            </GridCol>
+          </GridRow>
+          {/* --- Task List Component --- */}
           <GridRow>
             <GridCol>
               {isLoadingTasks && <Paragraph>Loading tasks...</Paragraph>}
               {/* Combined error messages */}
-              {(isTasksError ||
-                deleteMutation.isError ||
-                updateStatusMutation.isError) && (
-                <Paragraph style={{ color: "red" }}>
-                  {isTasksError &&
+              {(() => {
+                const errorParts = [];
+                if (isTasksError) {
+                  errorParts.push(
                     `Error fetching tasks: ${
                       tasksError?.message || "Unknown error"
-                    }`}
-                  {deleteMutation.isError &&
-                    `Error deleting task: ${deleteMutation.error.message}`}
-                  {updateStatusMutation.isError &&
-                    `Error updating status: ${updateStatusMutation.error.message}`}
-                </Paragraph>
-              )}
+                    }`
+                  );
+                }
+                if (deleteMutation.isError) {
+                  errorParts.push(
+                    `Error deleting task: ${deleteMutation.error.message}`
+                  );
+                }
+                if (updateStatusMutation.isError) {
+                  errorParts.push(
+                    `Error updating status: ${updateStatusMutation.error.message}`
+                  );
+                }
+
+                if (errorParts.length > 0) {
+                  // Using whiteSpace: 'pre-line' to respect newlines
+                  return (
+                    <Paragraph style={{ color: "red", whiteSpace: "pre-line" }}>
+                      {errorParts.join("\n")}
+                    </Paragraph>
+                  );
+                }
+                return null;
+              })()}
 
               {!isLoadingTasks && tasks.length > 0 && (
                 <TaskList
-                  tasks={filteredTasks}
+                  tasks={tasks}
                   onDelete={handleDelete}
-                  onUpdateStatus={handleUpdateStatus} // Pass update handler
+                  onUpdateStatus={handleUpdateStatus}
                 />
               )}
-              {!isLoadingTasks &&
-                tasks.length === 0 &&
-                selectedStatusFilter === ALL_STATUSES && (
-                  <Paragraph>No tasks exist yet. Add one above!</Paragraph>
-                )}
-              {!isLoadingTasks &&
-                filteredTasks.length === 0 &&
-                selectedStatusFilter !== ALL_STATUSES && (
-                  <Paragraph>
-                    No tasks found with status:{" "}
-                    {selectedStatusFilter.replace("_", " ").toLowerCase()}
-                  </Paragraph>
-                )}
+              {!isLoadingTasks && tasks.length === 0 && (
+                <Paragraph>No tasks exist yet. Add one above!</Paragraph>
+              )}
 
               {(createTaskMutation.isPending ||
                 deleteMutation.isPending ||

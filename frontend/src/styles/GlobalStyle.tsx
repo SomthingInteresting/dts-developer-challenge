@@ -44,7 +44,7 @@ const GlobalStyle = createGlobalStyle`
   /* Target the main content area itself */
   main.main__Main-sc-hiygwk-0 {
     /* flex: 1; */
-     /* Let content determine height within centered container */
+    background-color: #ffffff; /* Set main content background to white */
     padding-top: 30px !important; 
     padding-bottom: 30px !important; 
     /* overflow-y: auto; */
