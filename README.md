@@ -106,7 +106,9 @@ The recommended way to inspect the database contents is to use the `psql` client
     docker-compose down          # Stops and removes containers, networks
     ```
 
-### Running Tests (Backend)
+### Running Tests
+
+#### Backend Tests (Python/Pytest)
 
 The backend tests use `pytest` and are configured to run against the database service within the Docker network.
 
@@ -115,12 +117,22 @@ The backend tests use `pytest` and are configured to run against the database se
     docker-compose up -d db
     # Or ensure all services are up: docker-compose up -d
     ```
-2.  **Run tests:** Execute `pytest` inside a temporary backend container:
+2.  **Run backend tests:** Execute `pytest` inside a temporary backend container:
     ```bash
     docker-compose run --rm backend pytest
     ```
     - This connects to the `db` service using the `DATABASE_URL` from `backend/.env`.
     - The test database session creates and drops tables for each test function to ensure isolation.
+
+#### Frontend Tests (React/Vitest)
+
+The frontend tests use Vitest and React Testing Library. They can be run inside a temporary frontend container.
+
+1.  **Run frontend tests:**
+    ```bash
+    docker-compose run --rm frontend npm test
+    ```
+    - This command executes the test runner defined in `frontend/package.json` within the context of the frontend service container.
 
 ## Design & Implementation Notes
 

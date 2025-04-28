@@ -37,19 +37,22 @@ frontend/
 ├── public/           # Static assets
 ├── src/
 │   ├── assets/       # Frontend-specific assets (if any)
-│   ├── components/   # React components (TaskList, TaskItem, AddTaskForm)
+│   ├── components/   # React components (TaskList, TaskItem, AddTaskForm, *.test.tsx)
 │   ├── services/     # API interaction logic (api.ts)
 │   ├── styles/       # SCSS files (main.scss)
 │   ├── types/        # TypeScript type definitions (task.ts, govuk-frontend.d.ts)
 │   ├── App.tsx       # Main application component
+│   ├── App.test.tsx  # Example test file
 │   ├── main.tsx      # Application entry point
-│   └── index.css     # Basic global styles
+│   ├── index.css     # Basic global styles
+│   └── setupTests.ts # Test setup file (e.g., for jest-dom imports)
 ├── .gitignore
 ├── Dockerfile        # Docker build instructions (multi-stage)
 ├── index.html        # HTML entry point for Vite
 ├── nginx.conf        # Nginx configuration for serving
 ├── package.json
 ├── tsconfig.json
+├── tsconfig.app.json
 ├── tsconfig.node.json
 ├── vite.config.ts
 └── README.md         # This file
@@ -64,6 +67,30 @@ frontend/
 - @tanstack/react-query
 - govuk-frontend
 - sass
+- **Testing:**
+  - vitest
+  - jsdom
+  - @testing-library/react
+  - @testing-library/jest-dom
+  - @testing-library/user-event
+
+## Running Tests
+
+Unit and component tests are written using Vitest and React Testing Library.
+
+To run the tests:
+
+```bash
+npm test
+```
+
+Or, using the longer form:
+
+```bash
+npm run test
+```
+
+These commands will execute all `*.test.tsx` files within the `src` directory.
 
 ## Stopping the Application
 
