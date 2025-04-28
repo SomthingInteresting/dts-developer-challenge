@@ -4,6 +4,16 @@
 
 This project is a simple task management application built for the DTS Developer Challenge. It features a React/TypeScript frontend styled with `govuk-react` and a Python/FastAPI backend API connected to a PostgreSQL database. The entire application stack is designed to be run using Docker Compose for ease of setup and development consistency.
 
+## Application Preview
+
+![Task List View](docs/images/REPLACE_WITH_task-list-view.png "Task List Example")
+
+_Main view showing the task list table._
+
+![Add Task Form](docs/images/REPLACE_WITH_add-task-form.png "Add Task Form Example")
+
+_View showing the 'Add New Task' form._
+
 ## Repository Structure
 
 - `backend/`: Contains the Python/FastAPI backend service (API, database models, CRUD operations). See `backend/README.md` for details.

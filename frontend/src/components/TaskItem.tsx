@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Task, TaskStatus } from "../types/task";
-import { Button, Select, Tag } from "govuk-react";
+import { Button, Tag } from "govuk-react";
 import styled from "styled-components";
 
 const StyledTd = styled.td`
@@ -103,13 +103,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <StyledTd className="govuk-table__cell">
         <CellContent>
           {isEditing ? (
-            <Select
-              label="Status"
-              input={{
-                id: `status-select-${task.id}`,
-                value: selectedStatus,
-                onChange: handleStatusChange,
-              }}
+            <select
+              id={`status-select-${task.id}`}
+              value={selectedStatus}
+              onChange={handleStatusChange}
+              style={{ width: "100%", padding: "5px" }}
             >
               <option value={TaskStatus.PENDING}>
                 {formatStatusDisplay(TaskStatus.PENDING)}
@@ -120,7 +118,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
               <option value={TaskStatus.COMPLETED}>
                 {formatStatusDisplay(TaskStatus.COMPLETED)}
               </option>
-            </Select>
+            </select>
           ) : (
             <Tag tint={getStatusColor(task.status)}>
               {formatStatusDisplay(task.status)}
@@ -131,7 +129,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
       {/* Edit Status Action Cell */}
       <StyledTd className="govuk-table__cell">
         {isEditing ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <>
             <Button size="small" onClick={handleSaveClick}>
               Save
             </Button>
@@ -142,7 +140,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             >
               Cancel
             </Button>
-          </div>
+          </>
         ) : (
           <Button
             size="small"

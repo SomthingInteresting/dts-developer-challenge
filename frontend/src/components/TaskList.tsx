@@ -42,16 +42,16 @@ const TaskList: React.FC<TaskListProps> = ({
           <StyledTh scope="col" className="govuk-table__header" width="15%">
             Title
           </StyledTh>
-          <StyledTh scope="col" className="govuk-table__header" width="34%">
+          <StyledTh scope="col" className="govuk-table__header" width="26%">
             Description
           </StyledTh>
           <StyledTh scope="col" className="govuk-table__header" width="12%">
             Due Date
           </StyledTh>
-          <StyledTh scope="col" className="govuk-table__header" width="18%">
+          <StyledTh scope="col" className="govuk-table__header" width="22%">
             Status
           </StyledTh>
-          <StyledTh scope="col" className="govuk-table__header" width="8%">
+          <StyledTh scope="col" className="govuk-table__header" width="12%">
             Edit
           </StyledTh>
           <StyledTh scope="col" className="govuk-table__header" width="8%">
