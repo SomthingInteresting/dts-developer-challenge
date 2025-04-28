@@ -1,11 +1,19 @@
 import React, { useState } from "react";
 import { Task, TaskStatus } from "../types/task";
-// Import necessary govuk-react components
-import {
-  Button, // Keep for actions
-  Select, // Keep for status dropdown
-  Tag, // Re-import Tag
-} from "govuk-react";
+import { Button, Select, Tag } from "govuk-react";
+import styled from "styled-components";
+
+const StyledTd = styled.td`
+  border-bottom: 1px solid #b1b4b6;
+  padding: 10px 0;
+`;
+
+const CellContent = styled.div<{ $wrap?: boolean }>`
+  display: flex;
+  align-items: center;
+  white-space: ${(props) => (props.$wrap ? "normal" : "nowrap")};
+  overflow-wrap: ${(props) => (props.$wrap ? "break-word" : "normal")};
+`;
 
 interface TaskItemProps {
   task: Task;
@@ -13,7 +21,6 @@ interface TaskItemProps {
   onDelete: (id: number) => void;
 }
 
-// Helper function to determine Tag color based on status
 const getStatusColor = (status: TaskStatus) => {
   switch (status) {
     case TaskStatus.COMPLETED:
@@ -23,7 +30,7 @@ const getStatusColor = (status: TaskStatus) => {
     case TaskStatus.PENDING:
       return "GREY";
     default:
-      return "GREY"; // Default for PENDING or any other status
+      return "GREY";
   }
 };
 
@@ -32,7 +39,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onUpdateStatus,
   onDelete,
 }) => {
-  // State for editing mode and temporary status selection
   const [isEditing, setIsEditing] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
 
@@ -45,7 +51,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
   };
 
   const handleEditClick = () => {
-    setSelectedStatus(task.status); // Reset selection to current task status
+    setSelectedStatus(task.status);
     setIsEditing(true);
   };
 
@@ -58,12 +64,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
     setIsEditing(false);
   };
 
-  // Format the date (assuming due_date is a string in ISO format)
   const formattedDueDate = task.due_date
     ? new Date(task.due_date).toLocaleDateString()
     : "N/A";
 
-  // Helper to format status for display
   const formatStatusDisplay = (status: TaskStatus): string => {
     switch (status) {
       case TaskStatus.PENDING:
@@ -73,62 +77,38 @@ const TaskItem: React.FC<TaskItemProps> = ({
       case TaskStatus.COMPLETED:
         return "Completed";
       default:
-        return status; // Fallback
+        return status;
     }
   };
 
-  // Render a Table.Row instead of ListItem
   return (
     <tr className="govuk-table__row">
       {/* ID */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
-        <div style={{ display: "flex", alignItems: "center" }}>{task.id}</div>
-      </td>
+      <StyledTd className="govuk-table__cell">
+        <CellContent>{task.id}</CellContent>
+      </StyledTd>
       {/* Title */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
-        <div style={{ whiteSpace: "normal", overflowWrap: "break-word" }}>
-          {task.title}
-        </div>
-      </td>
+      <StyledTd className="govuk-table__cell">
+        <CellContent $wrap>{task.title}</CellContent>
+      </StyledTd>
       {/* Description */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
-        <div style={{ whiteSpace: "normal", overflowWrap: "break-word" }}>
-          {task.description}
-        </div>
-      </td>
+      <StyledTd className="govuk-table__cell">
+        <CellContent $wrap>{task.description}</CellContent>
+      </StyledTd>
       {/* Due Date */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
-        <div style={{ display: "flex", alignItems: "center" }}>
-          {formattedDueDate}
-        </div>
-      </td>
+      <StyledTd className="govuk-table__cell">
+        <CellContent>{formattedDueDate}</CellContent>
+      </StyledTd>
       {/* Status Display Only */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
-        <div style={{ display: "flex", alignItems: "center" }}>
+      <StyledTd className="govuk-table__cell">
+        <CellContent>
           {isEditing ? (
-            // Editing mode: Show Select dropdown only
             <Select
-              value={selectedStatus}
-              onChange={handleStatusChange}
               label="Status"
-              labelIsHidden // Hide label visually but keep for accessibility
               input={{
                 id: `status-select-${task.id}`,
+                value: selectedStatus,
+                onChange: handleStatusChange,
               }}
             >
               <option value={TaskStatus.PENDING}>
@@ -142,20 +122,15 @@ const TaskItem: React.FC<TaskItemProps> = ({
               </option>
             </Select>
           ) : (
-            // Display mode: Show Tag only
             <Tag tint={getStatusColor(task.status)}>
               {formatStatusDisplay(task.status)}
             </Tag>
           )}
-        </div>
-      </td>
+        </CellContent>
+      </StyledTd>
       {/* Edit Status Action Cell */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
+      <StyledTd className="govuk-table__cell">
         {isEditing ? (
-          // Editing mode: Show Save/Cancel buttons
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <Button size="small" onClick={handleSaveClick}>
               Save
@@ -169,7 +144,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
             </Button>
           </div>
         ) : (
-          // Display mode: Show Edit button
           <Button
             size="small"
             $buttonStyle="secondary"
@@ -178,18 +152,15 @@ const TaskItem: React.FC<TaskItemProps> = ({
             Edit
           </Button>
         )}
-      </td>
+      </StyledTd>
       {/* Actions Button */}
-      <td
-        className="govuk-table__cell"
-        style={{ borderBottom: "1px solid #b1b4b6" }}
-      >
-        <div style={{ display: "flex", alignItems: "center" }}>
+      <StyledTd className="govuk-table__cell">
+        <CellContent>
           <Button buttonColour="#f47738" onClick={handleDeleteClick}>
             Delete
           </Button>
-        </div>
-      </td>
+        </CellContent>
+      </StyledTd>
     </tr>
   );
 };

@@ -1,21 +1,19 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getTasks,
-  updateTaskStatus, // Re-add import for update functionality
+  updateTaskStatus,
   deleteTask,
   createTask,
-} from "./services/api"; // Import the API functions
-import { TaskStatus, TaskCreate, Task } from "./types/task"; // Import TaskStatus enum and TaskCreate type
-import TaskList from "./components/TaskList"; // Import TaskList component
-import AddTaskForm from "./components/AddTaskForm"; // Import AddTaskForm component
-
-// Import GOV.UK React components and GlobalStyle
+} from "./services/api";
+import { TaskStatus, TaskCreate, Task } from "./types/task";
+import TaskList from "./components/TaskList";
+import AddTaskForm from "./components/AddTaskForm";
 import {
   Page,
   Main,
   H1,
-  H2, // Added H2 back
+  H2,
   GridRow,
   GridCol,
   Paragraph,
@@ -26,21 +24,18 @@ import GlobalStyle from "./styles/GlobalStyle";
 function App() {
   const queryClient = useQueryClient();
 
-  // State for filter and form visibility
   const [isAddTaskFormVisible, setIsAddTaskFormVisible] = useState(false);
 
-  // Query for fetching tasks
   const {
     isLoading: isLoadingTasks,
     isError: isTasksError,
-    data: tasks = [], // Default to empty array
+    data: tasks = [],
     error: tasksError,
   } = useQuery<Task[], Error>({
-    queryKey: ["tasks"], // Unique key for this query
-    queryFn: getTasks, // Function that fetches the data
+    queryKey: ["tasks"],
+    queryFn: getTasks,
   });
 
-  // *** Add Mutation for updating task status ***
   const updateStatusMutation = useMutation<
     Task,
     Error,
@@ -55,49 +50,37 @@ function App() {
       console.error("Error updating task status:", updateError);
     },
   });
-  // ******************************************
 
-  // Mutation for deleting a task
   const deleteMutation = useMutation<void, Error, number>({
     mutationFn: (taskId: number) => deleteTask(taskId),
     onSuccess: () => {
-      // Invalidate and refetch the tasks query after a successful delete
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    // Optional: Add onError handling
     onError: (deleteError) => {
       console.error("Error deleting task:", deleteError);
-      // TODO: Show user feedback
     },
   });
 
-  // Mutation for creating a task
   const createTaskMutation = useMutation<Task, Error, TaskCreate>({
     mutationFn: (newTask: TaskCreate) => createTask(newTask),
     onSuccess: () => {
-      // Invalidate and refetch the tasks query after successful creation
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      setIsAddTaskFormVisible(false); // Hide form on success
+      setIsAddTaskFormVisible(false);
     },
     onError: (createError) => {
       console.error("Error creating task:", createError);
-      // TODO: Show user feedback
     },
   });
 
-  // Handlers
   const handleDelete = (taskId: number) => {
-    // Optional: Add confirmation dialog here
     if (window.confirm(`Are you sure you want to delete task ${taskId}?`)) {
       deleteMutation.mutate(taskId);
     }
   };
 
-  // *** Add handler for updating status ***
   const handleUpdateStatus = (taskId: number, status: TaskStatus) => {
     updateStatusMutation.mutate({ taskId, statusData: { status } });
   };
-  // *************************************
 
   const handleCreateTask = (taskData: TaskCreate) => {
     createTaskMutation.mutate(taskData);
@@ -110,24 +93,13 @@ function App() {
         <Main>
           <GridRow>
             <GridCol>
-              <H1 mb={6}>HMCTS Task Management</H1> {/* Simplified title */}
+              <H1 mb={6}>HMCTS Task Management</H1>
             </GridCol>
           </GridRow>
-          {/* --- Add Task Section (Button & Form) --- */}
-          {/* <GridRow mb={isAddTaskFormVisible ? 2 : 4}>
-             {" "}
-             <GridCol>
-               <Button
-                 onClick={() => setIsAddTaskFormVisible(!isAddTaskFormVisible)}
-               >
-                 {isAddTaskFormVisible ? "Cancel Add Task" : "Add New Task"}
-               </Button>
-             </GridCol>
-           </GridRow> */}
           {isAddTaskFormVisible && (
             <GridRow mb={6}>
               <GridCol>
-                <H2>Add New Task</H2> {/* Heading for form */}
+                <H2>Add New Task</H2>
                 <AddTaskForm
                   onCreateTask={handleCreateTask}
                   isCreating={createTaskMutation.isPending}
@@ -140,20 +112,14 @@ function App() {
               </GridCol>
             </GridRow>
           )}
-          {/* Divider */}
           {!isAddTaskFormVisible && (
             <hr style={{ borderColor: "#b1b4b6", margin: "20px 0" }} />
           )}
-          {/* --- Task Header and Add Button Row --- */}
           <GridRow mb={2}>
-            {" "}
-            {/* Add margin bottom */}
             <GridCol setWidth="two-thirds">
-              <H2 mb={0}>Tasks</H2>{" "}
-              {/* Heading for list, remove default bottom margin */}
+              <H2 mb={0}>Tasks</H2>
             </GridCol>
             <GridCol setWidth="one-third" style={{ textAlign: "right" }}>
-              {/* Moved Add Button */}
               <Button
                 onClick={() => setIsAddTaskFormVisible(!isAddTaskFormVisible)}
               >
@@ -161,11 +127,9 @@ function App() {
               </Button>
             </GridCol>
           </GridRow>
-          {/* --- Task List Component --- */}
           <GridRow>
             <GridCol>
               {isLoadingTasks && <Paragraph>Loading tasks...</Paragraph>}
-              {/* Combined error messages */}
               {(() => {
                 const errorParts = [];
                 if (isTasksError) {
@@ -187,7 +151,6 @@ function App() {
                 }
 
                 if (errorParts.length > 0) {
-                  // Using whiteSpace: 'pre-line' to respect newlines
                   return (
                     <Paragraph style={{ color: "red", whiteSpace: "pre-line" }}>
                       {errorParts.join("\n")}

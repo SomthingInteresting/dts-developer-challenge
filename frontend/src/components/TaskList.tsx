@@ -1,10 +1,21 @@
 import React from "react";
 import { Task, TaskStatus } from "../types/task";
-// Import govuk-react components
 import { Paragraph } from "govuk-react";
-// Removed H2 as it's not used directly here anymore
-// Import TaskItem component
 import TaskItem from "./TaskItem";
+import styled from "styled-components";
+
+const StyledTable = styled.table`
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+`;
+
+const StyledTh = styled.th<{ width?: string }>`
+  width: ${(props) => props.width || "auto"};
+  border-bottom: 2px solid #0b0c0c;
+  padding: 10px 0;
+  text-align: left;
+`;
 
 interface TaskListProps {
   tasks: Task[];
@@ -22,69 +33,33 @@ const TaskList: React.FC<TaskListProps> = ({
   }
 
   return (
-    // Use standard HTML table
-    <table
-      className="govuk-table"
-      style={{ borderCollapse: "collapse", tableLayout: "fixed" }}
-    >
+    <StyledTable className="govuk-table">
       <thead className="govuk-table__head">
         <tr className="govuk-table__row">
-          {/* Define column headers with suggested widths */}
-          {/* New ID column */}
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "5%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          <StyledTh scope="col" className="govuk-table__header" width="5%">
             ID
-          </th>
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "15%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          </StyledTh>
+          <StyledTh scope="col" className="govuk-table__header" width="15%">
             Title
-          </th>
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "34%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          </StyledTh>
+          <StyledTh scope="col" className="govuk-table__header" width="34%">
             Description
-          </th>
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "12%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          </StyledTh>
+          <StyledTh scope="col" className="govuk-table__header" width="12%">
             Due Date
-          </th>
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "18%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          </StyledTh>
+          <StyledTh scope="col" className="govuk-table__header" width="18%">
             Status
-          </th>
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "8%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          </StyledTh>
+          <StyledTh scope="col" className="govuk-table__header" width="8%">
             Edit
-          </th>
-          <th
-            scope="col"
-            className="govuk-table__header"
-            style={{ width: "8%", borderBottom: "2px solid #0b0c0c" }}
-          >
+          </StyledTh>
+          <StyledTh scope="col" className="govuk-table__header" width="8%">
             Delete
-          </th>
+          </StyledTh>
         </tr>
       </thead>
       <tbody className="govuk-table__body">
-        {/* Map tasks to TaskItem components, passing props */}
-        {/* TaskItem will need to be refactored to render a <tr> */}
         {tasks.map((task) => (
           <TaskItem
             key={task.id}
@@ -94,7 +69,7 @@ const TaskList: React.FC<TaskListProps> = ({
           />
         ))}
       </tbody>
-    </table>
+    </StyledTable>
   );
 };
 

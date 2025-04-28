@@ -34,9 +34,6 @@ if not DATABASE_URL:
     # TEST_DATABASE_FILE = os.path.join(_TEMP_DIR, "test_backend.db")
     # DATABASE_URL = f"sqlite:///{TEST_DATABASE_FILE}"
 
-print(f"Using database for tests: {DATABASE_URL}") # Debug print
-# ----------------------------- #
-
 # Create a test engine based on the resolved DATABASE_URL
 # Adjust connect_args based on DB type if needed (check_same_thread only for SQLite)
 connect_args = {}
