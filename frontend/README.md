@@ -1,54 +1,101 @@
-# React + TypeScript + Vite
+# Frontend Service (React/Vite + TypeScript)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+This service provides the user interface for the Task Management application. It is built using React (with Vite) and TypeScript. Users can view, create, update the status of, and delete tasks. It interacts with the backend API service to fetch and manipulate task data.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Styling is implemented using the official **`govuk-frontend`** library (processed via Sass) and standard HTML elements to align with the GOV.UK Design System.
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Docker Desktop or Docker Engine with Docker Compose installed.
+- Node.js and npm/yarn (only required for manual setup/development outside Docker).
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Setup & Running (Docker - Recommended)
+
+This service is designed to be run using Docker Compose from the project root directory (`dts-developer-challenge`). Please refer to the main `README.md` in the root directory for detailed instructions on:
+
+1.  Cloning the repository.
+2.  Setting up the backend environment (`backend/.env`).
+3.  Initializing the database (`docker-compose run --rm backend python -m backend.init_db`).
+4.  Building and starting all services (`docker-compose up -d --build`).
+
+Once the services are running, the frontend will be accessible at:
+`http://localhost:3000`
+
+## Development Notes
+
+- **Styling:** `govuk-frontend` styles are imported and processed via Sass in `src/styles/main.scss`. Components use standard HTML elements with the appropriate `govuk-*` CSS classes.
+- **GOV.UK JavaScript:** Essential JavaScript from `govuk-frontend` (for components like the header menu, error summary focusing, etc.) is initialised in `src/App.tsx` using `initAll()`.
+- **API Interaction:** The frontend communicates with the backend API (running on port 8000 within the Docker network) via Axios. The base URL is configured in `src/services/api.ts`.
+- **Docker Serving:** Within the Docker Compose setup, the built frontend assets are served by an Nginx container.
+
+## Project Structure
+
+```
+frontend/
+├── public/           # Static assets
+├── src/
+│   ├── assets/       # Frontend-specific assets (if any)
+│   ├── components/   # React components (TaskList, TaskItem, AddTaskForm, *.test.tsx)
+│   ├── services/     # API interaction logic (api.ts)
+│   ├── styles/       # SCSS files (main.scss)
+│   ├── types/        # TypeScript type definitions (task.ts, govuk-frontend.d.ts)
+│   ├── App.tsx       # Main application component
+│   ├── App.test.tsx  # Example test file
+│   ├── main.tsx      # Application entry point
+│   ├── index.css     # Basic global styles
+│   └── setupTests.ts # Test setup file (e.g., for jest-dom imports)
+├── .gitignore
+├── Dockerfile        # Docker build instructions (multi-stage)
+├── index.html        # HTML entry point for Vite
+├── nginx.conf        # Nginx configuration for serving
+├── package.json
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── vite.config.ts
+└── README.md         # This file
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Key Dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- React
+- TypeScript
+- Vite
+- Axios
+- @tanstack/react-query
+- govuk-frontend
+- sass
+- **Testing:**
+  - vitest
+  - jsdom
+  - @testing-library/react
+  - @testing-library/jest-dom
+  - @testing-library/user-event
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## Running Tests
+
+Unit and component tests are written using Vitest and React Testing Library.
+
+To run the tests:
+
+```bash
+npm test
+```
+
+Or, using the longer form:
+
+```bash
+npm run test
+```
+
+These commands will execute all `*.test.tsx` files within the `src` directory.
+
+## Stopping the Application
+
+From the project root directory, run:
+
+```bash
+docker-compose down
 ```
