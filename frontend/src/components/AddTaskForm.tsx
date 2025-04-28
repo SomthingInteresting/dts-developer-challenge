@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { TaskCreate } from "../types/task";
 
-// Re-import AppError type if it was defined in App.tsx, or define it here
-// Assuming it might be better defined globally or passed correctly
 interface AppError {
   message: string;
   fieldId?: string;
