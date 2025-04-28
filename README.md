@@ -114,9 +114,17 @@ The backend tests use `pytest` and are configured to run against the database se
 
 ## Design & Implementation Notes
 
-During development, some decisions were made to enhance the application while aiming to adhere to the core requirements and good development practices:
+This project was developed with a strict focus on adhering to the provided requirements, simulating an agile development environment where features are built based on explicit requests. Key points regarding this approach:
 
-- **Status Filtering:** The assessment required displaying tasks in a user-friendly interface. To meet this and align with the DDaT capability framework's skill of "User focus", status filtering (All, Pending, In Progress, Completed) was implemented. While the specific requirement didn't list filtering explicitly, it's considered a fundamental user need for managing tasks efficiently in any real-world scenario. The implementation uses clickable `Tag` components for simplicity, acknowledging that standard GDS filter patterns often use radios or checkboxes.
+- **Requirement Adherence:** The core functionalities (CRUD for tasks, basic display) were implemented as specified. Features not explicitly listed in the frontend requirements, such as a dedicated task detail view or filtering, were intentionally omitted.
+- **Frontend Filtering:** Initial exploration included frontend filtering, but this was removed. While potentially useful, it was not a requirement, and significant filtering logic is often better handled server-side for performance and consistency.
+- **API Endpoint Usage:** The backend provides an endpoint to retrieve a task by ID (`/tasks/{task_id}`), fulfilling its requirement. However, as the frontend requirements did not necessitate a view that would use this (like a task detail page), this specific endpoint is not currently consumed by the frontend application.
+- **UI/UX Enhancements:** Within the scope of the requirements, some minor UI/UX improvements were made iteratively:
+  - The task list was refactored from an initial `govuk-react` List to a standard HTML table (`<table>`) to resolve component compatibility issues and provide a clearer structure.
+  - Inline status editing was added using the `govuk-react` Tag and Select components.
+  - Column widths were adjusted, and text wrapping was implemented for better readability with long content.
+  - The "Add New Task" button was positioned alongside the "Tasks" heading for better visual flow.
+- **Code Refactoring:** Inline styles initially used for layout debugging were refactored into `styled-components` (`StyledTable`, `StyledTh`, `StyledTd`, `CellContent`) to improve code maintainability and adhere to best practices.
 
 ## Manual Setup (Not Recommended)
 
