@@ -29,13 +29,15 @@ Based on the flexibility offered ("Any language or framework of your choice") an
 
 - **Backend:** Python with FastAPI framework.
 - **Frontend:** React with TypeScript, built using Vite.
+- **Styling:** Standard HTML with **`govuk-frontend`** library (SCSS/CSS and JavaScript).
 - **Database:** PostgreSQL.
-- **Supporting Tools:** SQLAlchemy (ORM), Pydantic (Validation), Pytest (Testing), Axios (HTTP Client), Vitest/React Testing Library (Frontend Testing), Docker (for DB).
+- **Supporting Tools:** SQLAlchemy (ORM), Pydantic (Validation), Pytest (Testing), Axios (HTTP Client), Vitest/React Testing Library (Frontend Testing), Docker (for DB), **Sass** (for processing govuk-frontend styles).
 
 **Rationale:**
 
 - **Proficiency:** Selecting a familiar stack allows for faster development and a focus on code quality, structure, and best practices, rather than grappling with unfamiliar syntax or libraries under time pressure.
 - **Modern Practices:** FastAPI and React/TS represent modern, widely-used technologies employing current best practices (async, type safety, component-based UI).
+- **GOV.UK Alignment:** Using the official `govuk-frontend` library ensures visual consistency and adherence to the GOV.UK Design System standards.
 - **Feature Alignment:** FastAPI provides automatic API documentation (Swagger UI) and uses Pydantic for robust validation, directly meeting technical requirements. React/TS enables building a type-safe, interactive user interface.
 
 **Addressing HMCTS Stack (Java/JavaScript):**
@@ -50,7 +52,7 @@ While the chosen stack differs from the suggested Java/JavaScript starters, the 
 
 - **Client-Server:** A standard decoupled architecture. The React frontend acts as the client, consuming the backend API.
 - **Backend:** FastAPI application serving a RESTful API over HTTP. It handles business logic, interacts with the database via the SQLAlchemy ORM, and uses Pydantic for data validation.
-- **Frontend:** Single Page Application (SPA) built with React/TS. Manages UI state, interacts with the backend API via Axios, and renders the task management interface.
+- **Frontend:** Single Page Application (SPA) built with React/TS. Manages UI state, interacts with the backend API via Axios, and renders the task management interface using standard HTML elements styled with **`govuk-frontend`** CSS classes.
 - **Database:** PostgreSQL instance (run via Docker for ease of setup) storing task data.
 - **API:** RESTful principles, using JSON for data interchange.
 
@@ -73,7 +75,10 @@ While the chosen stack differs from the suggested Java/JavaScript starters, the 
     - Build React components (TaskList, TaskItem, TaskForm).
     - Implement state management.
     - Connect components to API client functions.
-    - Implement UI/UX (styling, loading/error states).
+    - **Integrate `govuk-frontend` SCSS/CSS for styling.**
+    - **Implement UI using standard HTML and `govuk-frontend` classes (Header, Footer, Table, Form elements, Buttons, Tags, Error Summary etc.).**
+    - Implement loading/error states using standard components.
+    - **Initialize `govuk-frontend` JavaScript.**
     - Write component tests (Vitest/RTL).
 5.  **Finalisation:** Thoroughly update READMEs, final code review, ensure all requirements are met, push to GitHub.
 

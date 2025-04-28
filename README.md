@@ -2,22 +2,22 @@
 
 ## Overview
 
-This project is a simple task management application built for the DTS Developer Challenge. It features a React/TypeScript frontend styled with `govuk-react` and a Python/FastAPI backend API connected to a PostgreSQL database. The entire application stack is designed to be run using Docker Compose for ease of setup and development consistency.
+This project is a simple task management application built for the DTS Developer Challenge. It features a React/TypeScript frontend styled using standard HTML and **`govuk-frontend` CSS classes** and a Python/FastAPI backend API connected to a PostgreSQL database. The entire application stack is designed to be run using Docker Compose for ease of setup and development consistency.
 
 ## Application Preview
 
-![Task List View](docs/images/REPLACE_WITH_task-list-view.png "Task List Example")
+![Task List View](docs/images/task-list-view.png "Task List Example")
 
 _Main view showing the task list table._
 
-![Add Task Form](docs/images/REPLACE_WITH_add-task-form.png "Add Task Form Example")
+![Add Task Form](docs/images/add-task-form.png "Add Task Form Example")
 
 _View showing the 'Add New Task' form._
 
 ## Repository Structure
 
 - `backend/`: Contains the Python/FastAPI backend service (API, database models, CRUD operations). See `backend/README.md` for details.
-- `frontend/`: Contains the React/Vite/TypeScript frontend application (UI components, API service). See `frontend/README.md` for details.
+- `frontend/`: Contains the React/Vite/TypeScript frontend application (UI components styled with `govuk-frontend`, API service integration). See `frontend/README.md` for details.
 - `docker-compose.yml`: Defines the application services (frontend, backend, db) for Docker Compose.
 - `.gitignore`: Standard Git ignore file.
 - `README.md`: This file - provides overall project information and Docker Compose instructions.
@@ -129,12 +129,14 @@ This project was developed with a strict focus on adhering to the provided requi
 - **Requirement Adherence:** The core functionalities (CRUD for tasks, basic display) were implemented as specified. Features not explicitly listed in the frontend requirements, such as a dedicated task detail view or filtering, were intentionally omitted.
 - **Frontend Filtering:** Initial exploration included frontend filtering, but this was removed. While potentially useful, it was not a requirement, and significant filtering logic is often better handled server-side for performance and consistency.
 - **API Endpoint Usage:** The backend provides an endpoint to retrieve a task by ID (`/tasks/{task_id}`), fulfilling its requirement. However, as the frontend requirements did not necessitate a view that would use this (like a task detail page), this specific endpoint is not currently consumed by the frontend application.
-- **UI/UX Enhancements:** Within the scope of the requirements, some minor UI/UX improvements were made iteratively:
-  - The task list was refactored from an initial `govuk-react` List to a standard HTML table (`<table>`) to resolve component compatibility issues and provide a clearer structure.
-  - Inline status editing was added using the `govuk-react` Tag and Select components.
-  - Column widths were adjusted, and text wrapping was implemented for better readability with long content.
-  - The "Add New Task" button was positioned alongside the "Tasks" heading for better visual flow.
-- **Code Refactoring:** Inline styles initially used for layout debugging were refactored into `styled-components` (`StyledTable`, `StyledTh`, `StyledTd`, `CellContent`) to improve code maintainability and adhere to best practices.
+- **UI/UX Implementation:** Within the scope of the requirements, UI/UX was implemented using the **`govuk-frontend`** library:
+  - The standard GOV.UK Header and Footer were implemented.
+  - Standard GOV.UK form components (input, textarea, date input pattern, error messages) were implemented using `govuk-frontend` classes.
+  - The GOV.UK Error Summary pattern was implemented for displaying API errors.
+  - Inline status editing was implemented using standard HTML select and button elements styled with `govuk-frontend`.
+  - The Task List uses a standard HTML table (`<table>`) styled with `govuk-frontend`.
+  - Minor layout adjustments were made for better visual flow (e.g., button placement).
+- **Styling Approach:** Standard HTML elements are styled using `govuk-frontend` SCSS/CSS classes to align closely with standard GOV.UK implementation patterns.
 
 ## Manual Setup (Not Recommended)
 
