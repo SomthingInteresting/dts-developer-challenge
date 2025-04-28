@@ -17,12 +17,17 @@ This service is designed to be run using Docker Compose from the project root.
     cd ..
     ```
 2.  **Environment Variables:**
-    - Ensure a `.env` file exists in this directory (`backend/.env`). Docker Compose will automatically load it into the service container.
+
+    - An environment file named `.env.assessment` is included in this directory (`backend/.env.assessment`) for assessment visibility. Docker Compose will load it into the service container.
     - It must contain the following variable, pointing to the database service defined in `docker-compose.yml`:
+
     ```dotenv
     DATABASE_URL=postgresql://taskuser:taskpassword@db:5432/taskdb
     # Add other backend-specific variables if needed
     ```
+
+    - **Note:** In a real project, this file would typically be named `.env` and added to `.gitignore`.
+
 3.  **Database Initialization (First Run):**
     - The database container (`db`) needs to be running.
     - To create the necessary database tables defined by the SQLAlchemy models, run the following command from the project root:
@@ -65,7 +70,7 @@ The backend tests use `pytest` and require a running database. Ensure the databa
     docker-compose run --rm backend pytest
     ```
     - This command starts a temporary backend container.
-    - It connects to the `db` service using the `DATABASE_URL` from `backend/.env`.
+    - It connects to the `db` service using the `DATABASE_URL` from `backend/.env.assessment`.
     - `pytest` discovers and runs the tests in the `backend/tests` directory.
     - Tables are created before each test function and dropped afterwards (based on the `conftest.py` fixture).
 
@@ -80,7 +85,7 @@ backend/
 ├── models/         # SQLAlchemy ORM models
 ├── schemas/        # Pydantic schemas (data validation/serialisation)
 ├── tests/          # Unit and integration tests
-├── .env            # Environment variables (loaded by Docker Compose)
+├── .env.assessment # Environment variables (visible for assessment)
 ├── main.py         # FastAPI application entry point
 ├── requirements.txt # Dependencies
 ├── Dockerfile      # Docker build instructions

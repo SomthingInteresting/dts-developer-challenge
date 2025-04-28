@@ -151,10 +151,8 @@ function App() {
   });
 
   const handleDelete = (taskId: number) => {
-    if (window.confirm(`Are you sure you want to delete task ${taskId}?`)) {
-      setAppErrors([]);
-      deleteMutation.mutate(taskId);
-    }
+    setAppErrors([]);
+    deleteMutation.mutate(taskId);
   };
 
   const handleUpdateStatus = (taskId: number, status: TaskStatus) => {

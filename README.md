@@ -40,12 +40,16 @@ This is the primary method for running the application. It manages the database,
     cd dts-developer-challenge
     ```
 2.  **Backend Environment File:**
-    - Create a `.env` file inside the `backend` directory (`backend/.env`).
-    - Add the database connection string required by the backend service:
+
+    - An environment file named `.env.assessment` is included in the `backend` directory (`backend/.env.assessment`) for assessment visibility.
+    - Docker Compose is configured to load this file for the backend service.
+    - It must contain the database connection string:
       ```dotenv
       DATABASE_URL=postgresql://taskuser:taskpassword@db:5432/taskdb
       ```
       _(Note: This uses the service name `db` which Docker Compose resolves internally)_
+    - **Important:** In a real-world scenario, this file would usually be named `.env`, not committed to Git, and managed securely.
+
 3.  **Database Initialization (First Run Only):**
     - The first time you run the application (or after clearing the database volume), the database tables need to be created.
     - Start the database service temporarily: `docker-compose up -d db`
@@ -121,7 +125,7 @@ The backend tests use `pytest` and are configured to run against the database se
     ```bash
     docker-compose run --rm backend pytest
     ```
-    - This connects to the `db` service using the `DATABASE_URL` from `backend/.env`.
+    - This connects to the `db` service using the `DATABASE_URL` from `backend/.env.assessment`.
     - The test database session creates and drops tables for each test function to ensure isolation.
 
 #### Frontend Tests (React/Vitest)

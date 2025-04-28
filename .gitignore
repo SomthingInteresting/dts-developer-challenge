@@ -10,9 +10,13 @@ env/
 ENV/
 
 # Environment variables
-.env
-.env.*
+# .env # Keep ignoring generic .env at root if any
+# .env.* # Keep ignoring most patterns
 !.env.example
+# --- Assessment Requirement --- #
+# Allow backend/.env.* for assessment visibility
+!backend/.env.assessment
+# ---------------------------- #
 
 # Build artifacts
 dist/
