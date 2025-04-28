@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { initAll } from "govuk-frontend";
+import { AxiosError } from "axios";
 import {
   getTasks,
   updateTaskStatus,
@@ -14,6 +15,16 @@ import AddTaskForm from "./components/AddTaskForm";
 interface AppError {
   message: string;
   fieldId?: string;
+}
+
+interface ApiValidationErrorDetail {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+}
+
+interface ApiValidationErrorResponse {
+  detail: ApiValidationErrorDetail[];
 }
 
 function App() {
@@ -69,18 +80,73 @@ function App() {
     },
   });
 
-  const createTaskMutation = useMutation<Task, Error, TaskCreate>({
+  const mapApiFieldToId = (fieldName: string | number): string | undefined => {
+    if (typeof fieldName !== "string") return undefined;
+    switch (fieldName.toLowerCase()) {
+      case "title":
+        return "#title";
+      case "due_date":
+        return "#due-date-day";
+      case "due_time":
+        return "#due-time-hour";
+      default:
+        return undefined;
+    }
+  };
+
+  const createTaskMutation = useMutation<
+    Task,
+    AxiosError<ApiValidationErrorResponse | unknown>,
+    TaskCreate
+  >({
     mutationFn: (newTask: TaskCreate) => createTask(newTask),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       setIsAddTaskFormVisible(false);
       setAppErrors([]);
     },
-    onError: (createError) => {
-      console.error("Error creating task:", createError);
-      setAppErrors([
-        { message: `Error creating task: ${createError.message}` },
-      ]);
+    onError: (error) => {
+      console.error("Error creating task:", error);
+      let errorsToSet: AppError[] = [];
+      if (error.response && error.response.status === 422) {
+        const responseData = error.response.data as ApiValidationErrorResponse;
+        if (responseData && Array.isArray(responseData.detail)) {
+          errorsToSet = responseData.detail.map(
+            (err: ApiValidationErrorDetail) => {
+              const fieldId =
+                err.loc && err.loc.length > 1
+                  ? mapApiFieldToId(err.loc[1])
+                  : undefined;
+              return {
+                message: err.msg,
+                fieldId: fieldId,
+              };
+            }
+          );
+          if (errorsToSet.length === 0) {
+            errorsToSet.push({
+              message: "Task creation failed: Invalid input.",
+            });
+          }
+        } else {
+          errorsToSet.push({
+            message: `Error creating task: Invalid server response format.`,
+          });
+        }
+      } else {
+        let message = error.message || "Unknown error";
+        if (
+          error.response?.data &&
+          typeof error.response.data === "object" &&
+          "detail" in error.response.data &&
+          typeof (error.response.data as { detail?: unknown }).detail ===
+            "string"
+        ) {
+          message = (error.response.data as { detail: string }).detail;
+        }
+        errorsToSet.push({ message: `Error creating task: ${message}` });
+      }
+      setAppErrors(errorsToSet);
     },
   });
 
@@ -198,6 +264,7 @@ function App() {
                 <AddTaskForm
                   onCreateTask={handleCreateTask}
                   isCreating={createTaskMutation.isPending}
+                  serverErrors={appErrors}
                 />
               </div>
             </div>

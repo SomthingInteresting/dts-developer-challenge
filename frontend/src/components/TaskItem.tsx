@@ -27,18 +27,28 @@ const TaskItem: React.FC<TaskItemProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatus(e.target.value as TaskStatus);
   };
 
   const handleDeleteClick = () => {
+    setIsConfirmingDelete(true);
+  };
+
+  const handleConfirmDeleteClick = () => {
     onDelete(task.id);
+  };
+
+  const handleCancelDeleteClick = () => {
+    setIsConfirmingDelete(false);
   };
 
   const handleEditClick = () => {
     setSelectedStatus(task.status);
     setIsEditing(true);
+    setIsConfirmingDelete(false);
   };
 
   const handleCancelClick = () => {
@@ -158,14 +168,35 @@ const TaskItem: React.FC<TaskItemProps> = ({
       </td>
       {/* Actions Button */}
       <td className="govuk-table__cell">
-        <button
-          type="button"
-          className="govuk-button govuk-button--warning"
-          data-module="govuk-button"
-          onClick={handleDeleteClick}
-        >
-          Delete
-        </button>
+        {isConfirmingDelete ? (
+          <>
+            <button
+              type="button"
+              className="govuk-button govuk-button--warning govuk-!-margin-right-1"
+              data-module="govuk-button"
+              onClick={handleConfirmDeleteClick}
+            >
+              Confirm Delete
+            </button>
+            <button
+              type="button"
+              className="govuk-button govuk-button--secondary"
+              data-module="govuk-button"
+              onClick={handleCancelDeleteClick}
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="govuk-button govuk-button--warning"
+            data-module="govuk-button"
+            onClick={handleDeleteClick}
+          >
+            Delete
+          </button>
+        )}
       </td>
     </tr>
   );

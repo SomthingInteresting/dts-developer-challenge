@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { TaskCreate } from "../types/task";
 
+// Re-import AppError type if it was defined in App.tsx, or define it here
+// Assuming it might be better defined globally or passed correctly
+interface AppError {
+  message: string;
+  fieldId?: string;
+}
+
 interface DateObject {
   day: string;
   month: string;
@@ -16,11 +23,13 @@ interface FormErrors {
 interface AddTaskFormProps {
   onCreateTask: (taskData: TaskCreate) => void;
   isCreating: boolean;
+  serverErrors?: AppError[]; // Add serverErrors prop
 }
 
 const AddTaskForm: React.FC<AddTaskFormProps> = ({
   onCreateTask,
   isCreating,
+  serverErrors = [], // Default to empty array
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -32,8 +41,14 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
   const [dueTime, setDueTime] = useState({ hour: "", minute: "" });
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // Helper to find server error for a specific field ID
+  const getServerErrorMessage = (fieldId: string): string | undefined => {
+    return serverErrors.find((err) => err.fieldId === fieldId)?.message;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Clear only client-side errors on new submission attempt
     setErrors({});
     let formIsValid = true;
     const newErrors: FormErrors = {};
@@ -115,6 +130,11 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
     setDueTime({ hour: "", minute: "" });
   };
 
+  // Pre-calculate server errors for cleaner rendering
+  const serverTitleError = getServerErrorMessage("#title");
+  const serverDateError = getServerErrorMessage("#due-date-day");
+  const serverTimeError = getServerErrorMessage("#due-time-hour");
+
   return (
     <fieldset className="govuk-fieldset">
       <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
@@ -124,31 +144,33 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
       <form onSubmit={handleSubmit} noValidate>
         <div
           className={`govuk-form-group ${
-            errors.title ? "govuk-form-group--error" : ""
+            errors.title || serverTitleError ? "govuk-form-group--error" : ""
           }`}
         >
           <label className="govuk-label govuk-label--m" htmlFor="title">
             Title
           </label>
-          {errors.title && (
+          {(errors.title || serverTitleError) && (
             <p id="title-error" className="govuk-error-message">
               <span className="govuk-visually-hidden">Error:</span>{" "}
-              {errors.title}
+              {serverTitleError || errors.title}
             </p>
           )}
           <input
             className={`govuk-input ${
-              errors.title ? "govuk-input--error" : ""
+              errors.title || serverTitleError ? "govuk-input--error" : ""
             }`}
-            id="title"
-            name="title"
+          id="title"
+          name="title"
             type="text"
             value={title}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setTitle(e.target.value)
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setTitle(e.target.value)
             }
             required
-            aria-describedby={errors.title ? "title-error" : undefined}
+            aria-describedby={
+              errors.title || serverTitleError ? "title-error" : undefined
+            }
           />
         </div>
 
@@ -158,7 +180,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
           </label>
           <textarea
             className="govuk-textarea"
-            id="description"
+          id="description"
             name="description"
             rows={5}
             value={description}
@@ -170,14 +192,14 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
 
         <div
           className={`govuk-form-group ${
-            errors.date ? "govuk-form-group--error" : ""
+            errors.date || serverDateError ? "govuk-form-group--error" : ""
           }`}
         >
           <fieldset
             className="govuk-fieldset"
             role="group"
             aria-describedby={`due-date-hint${
-              errors.date ? " due-date-error" : ""
+              errors.date || serverDateError ? " due-date-error" : ""
             }`}
           >
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
@@ -186,10 +208,10 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
             <div id="due-date-hint" className="govuk-hint">
               For example, 27 3 2024
             </div>
-            {errors.date && (
+            {(errors.date || serverDateError) && (
               <p id="due-date-error" className="govuk-error-message">
                 <span className="govuk-visually-hidden">Error:</span>{" "}
-                {errors.date}
+                {serverDateError || errors.date}
               </p>
             )}
             <div className="govuk-date-input" id="due-date">
@@ -203,7 +225,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                   </label>
                   <input
                     className={`govuk-input govuk-date-input__input govuk-input--width-2 ${
-                      errors.date ? "govuk-input--error" : ""
+                      errors.date || serverDateError ? "govuk-input--error" : ""
                     }`}
                     id="due_date_day"
                     name="due_date_day"
@@ -227,7 +249,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                   </label>
                   <input
                     className={`govuk-input govuk-date-input__input govuk-input--width-2 ${
-                      errors.date ? "govuk-input--error" : ""
+                      errors.date || serverDateError ? "govuk-input--error" : ""
                     }`}
                     id="due_date_month"
                     name="due_date_month"
@@ -251,7 +273,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                   </label>
                   <input
                     className={`govuk-input govuk-date-input__input govuk-input--width-4 ${
-                      errors.date ? "govuk-input--error" : ""
+                      errors.date || serverDateError ? "govuk-input--error" : ""
                     }`}
                     id="due_date_year"
                     name="due_date_year"
@@ -271,14 +293,14 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
 
         <div
           className={`govuk-form-group ${
-            errors.time ? "govuk-form-group--error" : ""
+            errors.time || serverTimeError ? "govuk-form-group--error" : ""
           }`}
         >
           <fieldset
             className="govuk-fieldset"
             role="group"
             aria-describedby={`due-time-hint${
-              errors.time ? " due-time-error" : ""
+              errors.time || serverTimeError ? " due-time-error" : ""
             }`}
           >
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
@@ -287,10 +309,10 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
             <div id="due-time-hint" className="govuk-hint">
               Use 24 hour format. For example, 14:30
             </div>
-            {errors.time && (
+            {(errors.time || serverTimeError) && (
               <p id="due-time-error" className="govuk-error-message">
                 <span className="govuk-visually-hidden">Error:</span>{" "}
-                {errors.time}
+                {serverTimeError || errors.time}
               </p>
             )}
             <div className="govuk-date-input" id="due-time">
@@ -304,7 +326,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                   </label>
                   <input
                     className={`govuk-input govuk-date-input__input govuk-input--width-2 ${
-                      errors.time ? "govuk-input--error" : ""
+                      errors.time || serverTimeError ? "govuk-input--error" : ""
                     }`}
                     id="due_time_hour"
                     name="due_time_hour"
@@ -329,7 +351,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({
                   </label>
                   <input
                     className={`govuk-input govuk-date-input__input govuk-input--width-2 ${
-                      errors.time ? "govuk-input--error" : ""
+                      errors.time || serverTimeError ? "govuk-input--error" : ""
                     }`}
                     id="due_time_minute"
                     name="due_time_minute"
